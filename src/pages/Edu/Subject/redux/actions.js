@@ -1,9 +1,9 @@
 import {
-  reqGetSubject, reqEduSubject, reqUpdateSubject
+  reqGetSubject, reqEduSubject, reqUpdateSubject, deleteSubject
 } from '@api/edu/subject'
 
 import {
-  SUBJRCTLIST, EDUSUBJCTLIST, UPDATESUBJECT
+  SUBJRCTLIST, EDUSUBJCTLIST, UPDATESUBJECT, DELETESUBJECT
 } from './constants'
 /**
  * 获取/搜索 用户分页数据
@@ -50,3 +50,18 @@ export const getUpdateSubject = (title, id) => {
     })
   }
 }
+// 删除页面发送请求
+const deleteSubjectSync = data => ({
+  type: DELETESUBJECT,
+  data
+})
+// 删除一级二级课程数据列表
+export const getDeleteSubject = (id) => {
+  return dispatch => {
+    return deleteSubject(id).then(response => {
+      dispatch(deleteSubjectSync(id))
+      return response
+    })
+  }
+}
+

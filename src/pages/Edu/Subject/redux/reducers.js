@@ -1,7 +1,8 @@
 import {
   SUBJRCTLIST,
   EDUSUBJCTLIST,
-  UPDATESUBJECT
+  UPDATESUBJECT,
+  DELETESUBJECT
 } from "./constants";
 
 const initSubjectList = {
@@ -50,7 +51,23 @@ export default function subjectList (prevState = initSubjectList, action) {
       return {
         ...prevState
       }
-
+    // 删除数据
+    case DELETESUBJECT:
+      const newItems = [...prevState.items]
+      newItems.forEach((item, index) => {
+        if (item._id === action.data) {
+          newItems.splice(index, 1)
+        }
+        item.children.forEach((childrenItem, index) => {
+          if (childrenItem._id === action.data) {
+            item.children.splice(index, 1)
+          }
+        })
+      })
+      return {
+        ...prevState,
+        items: newItems
+      }
     default:
       return prevState;
   }

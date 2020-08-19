@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Button, Table, Tooltip, Input, message } from 'antd'
-import { PlusOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons'
+import { Button, Table, Tooltip, Input, message, Modal } from 'antd'
+import { PlusOutlined, FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { connect } from 'react-redux'
 
-import { getSubjectList, getEdujectList, getUpdateSubject } from './redux'
+import { getSubjectList, getEdujectList, getUpdateSubject, getDeleteSubject } from './redux'
 
 import { reqUpdateSubject } from '@api/edu/subject'
 import './index.less'
@@ -44,7 +44,7 @@ const data = [
 ]
 
 // 使用高阶组件时,如果用修饰器语法: 传入展示组件的调用可以不写了
-@connect(state => ({ subjectList: state.subjectList }), { getSubjectList, getEdujectList, getUpdateSubject })
+@connect(state => ({ subjectList: state.subjectList }), { getSubjectList, getEdujectList, getUpdateSubject, getDeleteSubject })
 class Subject extends Component {
   state = {
     subjectId: '',
@@ -120,9 +120,30 @@ class Subject extends Component {
         title: ''
       })
     }
-    
+
 
   }
+  // 删除按钮的操作
+  delHandel = record => () => {
+    // 发请求更新数据
+    Modal.confirm({
+      title: <div>需要删除<span style={{ color: 'red', margin: '0 10px' }}>{record.title}</span>课程吗？</div>,
+      icon: <ExclamationCircleOutlined />,
+      onOk: async () => {
+        await this.props.getDeleteSubject(record._id)
+        // 删除了一级课程才需要更新页面数据发请求
+        if (record.parentId === '0') {
+          // 当前数据的长度小于0和页面不在第一页则删除时在去到上一页
+          if (this.props.subjectList.items.length <= 0 && this.page > 1) {
+            this.props.getSubjectList(--this.page, 5)
+          } else {
+            this.props.getSubjectList(this.page, 5)
+          }
+        }
+      }
+    })
+  }
+
   render () {
 
     const columns = [
@@ -175,6 +196,7 @@ class Subject extends Component {
                     icon={<DeleteOutlined />}
                     // size='large'
                     style={{ width: 40 }}
+                    onClick={this.delHandel(record)}
                   ></Button>
                 </Tooltip>
               </>

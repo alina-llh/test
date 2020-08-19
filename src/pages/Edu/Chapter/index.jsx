@@ -15,6 +15,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { connect } from "react-redux";
 import SearchForm from "./SearchForm";
+import { LessonList } from './redux'
 
 import "./index.less";
 
@@ -22,13 +23,13 @@ dayjs.extend(relativeTime);
 
 @connect(
   (state) => ({
-    // courseList: state.courseList
+    chapterlist: state.chapter.chapterlist
     // permissionValueList: filterPermissions(
     //   state.course.permissionValueList,
     //   "Course"
     // )
-  })
-  // { getcourseList }
+  }),
+  { LessonList }
 )
 class Chapter extends Component {
   state = {
@@ -53,7 +54,7 @@ class Chapter extends Component {
     });
   };
 
-  componentDidMount() {
+  componentDidMount () {
     // const { page, limit } = this.state;
     // this.handleTableChange(page, limit);
   }
@@ -89,8 +90,14 @@ class Chapter extends Component {
       selectedRowKeys,
     });
   };
-
-  render() {
+  // 点击展开按钮
+  onExpand = (expanded, record) => {
+    console.log(expanded, record)
+    if (expanded) {
+      this.props.LessonList(record._id)
+    }
+  }
+  render () {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
     const columns = [
@@ -106,31 +113,36 @@ class Chapter extends Component {
         },
       },
       {
+        title: "视频",
+        render: (record) => {
+          return record.free ? <Button>预览视频</Button> : null
+
+        },
+      },
+      {
         title: "操作",
-        width: 300,
+        width: 210,
         fixed: "right",
-        render: (data) => {
-          if ("free" in data) {
-            return (
-              <div>
-                <Tooltip title="查看详情">
-                  <Button>
-                    <SettingOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="更新章节">
-                  <Button type="primary" style={{ margin: "0 10px" }}>
-                    <FormOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="删除章节">
-                  <Button type="danger">
-                    <DeleteOutlined />
-                  </Button>
-                </Tooltip>
-              </div>
-            );
-          }
+        render: () => {
+          return (
+            <div>
+              <Tooltip title="新增章节">
+                <Button type="primary">
+                  <PlusOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="更新章节">
+                <Button type="primary" style={{ margin: "0 10px" }}>
+                  <FormOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="删除章节">
+                <Button type="danger">
+                  <DeleteOutlined />
+                </Button>
+              </Tooltip>
+            </div>
+          );
         },
       },
     ];
@@ -290,8 +302,11 @@ class Chapter extends Component {
           <Table
             rowSelection={rowSelection}
             columns={columns}
-            dataSource={data}
-            rowKey="id"
+            dataSource={this.props.chapterlist}
+            rowKey="_id"
+            expandable={{
+              onExpand: this.onExpand
+            }}
           />
         </div>
 
