@@ -1,3 +1,0 @@
-export const GET_SUBJECT_LIST = 'GET_SUBJECT_LIST'
-// 二级分类
-export const GET_EDUSUBJECT_LIST = 'GET_EDUSUBJECT_LIST'

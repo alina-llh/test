@@ -1,39 +1,37 @@
-import { reqGetCourseList } from '@api/edu/course'
-import { reqGetChapterList } from '@api/edu/chapter'
-import { reqGetLessonList } from '@api/edu/lesson'
-import { COURSELEST, CHAPTERLIST, LESSONLIST } from './constants'
-// 获取所有课程列表
-function CourseListSync (data) {
-  return { type: COURSELEST, data }
+import { reqGetCourse } from '@api/edu/course'
+import { reqGetChapter } from '@api/edu/chapter'
+import { reqGetLesson } from '@api/edu/lesson'
+import { GET_COURSELIST, GET_CHAPTERLIST, GET_LESSONLIST } from './contants'
+// 获取课程列表
+function courseListSync (data) {
+  return { type: GET_COURSELIST, data }
 }
-export function CourseList () {
+export function courseList () {
   return dispatch => {
-    reqGetCourseList().then(response => {
-      dispatch(CourseListSync(response))
+    reqGetCourse().then((res) => {
+      dispatch(courseListSync(res))
     })
   }
 }
-
 // 获取章节列表
 function chapterListSync (data) {
-  return { type: CHAPTERLIST, data }
+  return { type: GET_CHAPTERLIST, data }
 }
-export function chapterList (chapterId) {
+export function getChapterList (id) {
   return dispatch => {
-    return reqGetChapterList(chapterId).then(response => {
-      dispatch(chapterListSync(response.items))
+    reqGetChapter(id).then((res) => {
+      dispatch(chapterListSync(res.items))
     })
   }
 }
-
-// 章节子列表
-function LessonListSync (data) {
-  return { type: LESSONLIST, data }
+// 获取课时列表
+function lessonListSync (data) {
+  return { type: GET_LESSONLIST, data }
 }
-export function LessonList (id) {
+export function getLessonList (id) {
   return dispatch => {
-    return reqGetLessonList(id).then(response => {
-      dispatch(LessonListSync({response, id}))
+    return reqGetLesson(id).then((res) => {
+      dispatch(lessonListSync({ res, id }))
     })
   }
 }

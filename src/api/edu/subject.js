@@ -26,44 +26,31 @@ export function reqEduSubject (parentId) {
     method: 'GET'
   })
 }
-
-// http://localhost:5000/admin/edu/subject/save
-// post 增加课程
+// http://localhost:5000/admin/edu/subject/save POST
 export function reqAddSubject (title, parentId) {
   return request({
-    // 注意: 如果url地址只写了路径, 会被项目中配置的proxy拦截,然后将本地服务器的主机名拼接上去.
-    // 我们现在假设本地服务的接口还没有完成.要使用mock服务器.应该将mock服务的主机名直接写在url地址里面.这样proxy就不会拦截了
     url: `${BASE_URL}/save `,
     method: 'post',
     data: {
-      title,
-      parentId
+      title, parentId
     },
   })
 }
 
-// http://localhost:5000/admin/edu/subject/update
-// put 更新数据
+// http://localhost:5000/admin/edu/subject/update 更新数据
 export function reqUpdateSubject (title, id) {
   return request({
-    // 注意: 如果url地址只写了路径, 会被项目中配置的proxy拦截,然后将本地服务器的主机名拼接上去.
-    // 我们现在假设本地服务的接口还没有完成.要使用mock服务器.应该将mock服务的主机名直接写在url地址里面.这样proxy就不会拦截了
     url: `${BASE_URL}/update `,
     method: 'put',
     data: {
-      title,
-      id
+      title, id
     },
   })
 }
 
-// 删除数据的请求 delete
-// http://localhost:5000/admin/edu/subject/remove/:id
-
+// http://localhost:5000/admin/edu/subject/remove/:id删除课程分类
 export function deleteSubject (id) {
   return request({
-    // 注意: 如果url地址只写了路径, 会被项目中配置的proxy拦截,然后将本地服务器的主机名拼接上去.
-    // 我们现在假设本地服务的接口还没有完成.要使用mock服务器.应该将mock服务的主机名直接写在url地址里面.这样proxy就不会拦截了
     url: `${BASE_URL}/remove/${id} `,
     method: 'delete',
   })

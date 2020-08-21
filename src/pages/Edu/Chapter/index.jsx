@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Button, message, Tooltip, Modal, Alert, Table } from "antd";
+import React, { Component } from 'react';
+import { Button, message, Tooltip, Modal, Alert, Table } from 'antd';
 import {
   FullscreenOutlined,
   RedoOutlined,
@@ -8,34 +8,34 @@ import {
   PlusOutlined,
   FormOutlined,
   DeleteOutlined,
-} from "@ant-design/icons";
-import dayjs from "dayjs";
+} from '@ant-design/icons';
+import dayjs from 'dayjs';
 
-import relativeTime from "dayjs/plugin/relativeTime";
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { getLessonList } from './redux';
 
-import { connect } from "react-redux";
-import SearchForm from "./SearchForm";
-import { LessonList } from './redux'
+import { connect } from 'react-redux';
+import SearchForm from './SearchForm';
 
-import "./index.less";
+import './index.less';
 
 dayjs.extend(relativeTime);
 
 @connect(
   (state) => ({
-    chapterlist: state.chapter.chapterlist
+    chapterList: state.chapter.chapterList,
     // permissionValueList: filterPermissions(
     //   state.course.permissionValueList,
     //   "Course"
     // )
   }),
-  { LessonList }
+  { getLessonList }
 )
 class Chapter extends Component {
   state = {
     searchLoading: false,
     previewVisible: false,
-    previewImage: "",
+    previewImage: '',
     selectedRowKeys: [],
   };
 
@@ -54,11 +54,15 @@ class Chapter extends Component {
     });
   };
 
-  componentDidMount () {
+  componentDidMount() {
     // const { page, limit } = this.state;
     // this.handleTableChange(page, limit);
   }
-
+  // 跳转到add页面组件
+  handleGoAddChapter = (data) => () => {
+    // console.log(data);
+    this.props.history.push('/edu/chapter/addlesson', data._id);
+  };
   handleTableChange = (page, limit) => {
     this.setState({
       tableLoading: true,
@@ -78,10 +82,10 @@ class Chapter extends Component {
       .getcourseList({ page, limit, Coursename, nickName })
       .then((total) => {
         if (total === 0) {
-          message.warning("暂无用户列表数据");
+          message.warning('暂无用户列表数据');
           return;
         }
-        message.success("获取用户列表数据成功");
+        message.success('获取用户列表数据成功');
       });
   };
 
@@ -90,49 +94,49 @@ class Chapter extends Component {
       selectedRowKeys,
     });
   };
-  // 点击展开按钮
-  onExpand = (expanded, record) => {
-    console.log(expanded, record)
+  // +展开时函数
+  onExpand = async (expanded, record) => {
     if (expanded) {
-      this.props.LessonList(record._id)
+      await this.props.getLessonList(record._id);
     }
-  }
-  render () {
+  };
+  render() {
     const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
     const columns = [
       {
-        title: "章节名称",
-        dataIndex: "title",
+        title: '章节名称',
+        dataIndex: 'title',
       },
       {
-        title: "是否免费",
-        dataIndex: "free",
+        title: '是否免费',
+        dataIndex: 'free',
         render: (isFree) => {
-          return isFree === true ? "是" : isFree === false ? "否" : "";
+          return isFree === true ? '是' : isFree === false ? '否' : '';
         },
       },
       {
-        title: "视频",
+        title: '视频',
         render: (record) => {
-          return record.free ? <Button>预览视频</Button> : null
-
+          if (record.free) {
+            return <Button>预览视频</Button>;
+          }
         },
       },
       {
-        title: "操作",
+        title: '操作',
         width: 210,
-        fixed: "right",
-        render: () => {
+        fixed: 'right',
+        render: (data) => {
           return (
             <div>
-              <Tooltip title="新增章节">
-                <Button type="primary">
+              <Tooltip title="新建章节">
+                <Button type="primary" onClick={this.handleGoAddChapter(data)}>
                   <PlusOutlined />
                 </Button>
               </Tooltip>
               <Tooltip title="更新章节">
-                <Button type="primary" style={{ margin: "0 10px" }}>
+                <Button type="primary" style={{ margin: '0 10px' }}>
                   <FormOutlined />
                 </Button>
               </Tooltip>
@@ -149,74 +153,74 @@ class Chapter extends Component {
 
     const data = [
       {
-        id: "111",
-        title: "第一章节",
+        id: '111',
+        title: '第一章节',
         children: [
           {
-            id: "1",
-            title: "第一课时",
+            id: '1',
+            title: '第一课时',
             free: false,
-            videoSourceId: "756cf06db9cb4f30be85a9758b19c645",
+            videoSourceId: '756cf06db9cb4f30be85a9758b19c645',
           },
           {
-            id: "2",
-            title: "第二课时",
+            id: '2',
+            title: '第二课时',
             free: true,
-            videoSourceId: "2a02d726622f4c7089d44cb993c531e1",
+            videoSourceId: '2a02d726622f4c7089d44cb993c531e1',
           },
           {
-            id: "3",
-            title: "第三课时",
+            id: '3',
+            title: '第三课时',
             free: true,
-            videoSourceId: "4e560c892fdf4fa2b42e0671aa42fa9d",
+            videoSourceId: '4e560c892fdf4fa2b42e0671aa42fa9d',
           },
         ],
       },
       {
-        id: "222",
-        title: "第二章节",
+        id: '222',
+        title: '第二章节',
         children: [
           {
-            id: "4",
-            title: "第一课时",
+            id: '4',
+            title: '第一课时',
             free: false,
-            videoSourceId: "756cf06db9cb4f30be85a9758b19c645",
+            videoSourceId: '756cf06db9cb4f30be85a9758b19c645',
           },
           {
-            id: "5",
-            title: "第二课时",
+            id: '5',
+            title: '第二课时',
             free: true,
-            videoSourceId: "2a02d726622f4c7089d44cb993c531e1",
+            videoSourceId: '2a02d726622f4c7089d44cb993c531e1',
           },
           {
-            id: "6",
-            title: "第三课时",
+            id: '6',
+            title: '第三课时',
             free: true,
-            videoSourceId: "4e560c892fdf4fa2b42e0671aa42fa9d",
+            videoSourceId: '4e560c892fdf4fa2b42e0671aa42fa9d',
           },
         ],
       },
       {
-        id: "333",
-        title: "第三章节",
+        id: '333',
+        title: '第三章节',
         children: [
           {
-            id: "1192252824606289921",
-            title: "第一课时",
+            id: '1192252824606289921',
+            title: '第一课时',
             free: false,
-            videoSourceId: "756cf06db9cb4f30be85a9758b19c645",
+            videoSourceId: '756cf06db9cb4f30be85a9758b19c645',
           },
           {
-            id: "1192628092797730818",
-            title: "第二课时",
+            id: '1192628092797730818',
+            title: '第二课时',
             free: true,
-            videoSourceId: "2a02d726622f4c7089d44cb993c531e1",
+            videoSourceId: '2a02d726622f4c7089d44cb993c531e1',
           },
           {
-            id: "1192632495013380097",
-            title: "第三课时",
+            id: '1192632495013380097',
+            title: '第三课时',
             free: true,
-            videoSourceId: "4e560c892fdf4fa2b42e0671aa42fa9d",
+            videoSourceId: '4e560c892fdf4fa2b42e0671aa42fa9d',
           },
         ],
       },
@@ -291,7 +295,7 @@ class Chapter extends Component {
             message={
               <span>
                 <InfoCircleOutlined
-                  style={{ marginRight: 10, color: "#1890ff" }}
+                  style={{ marginRight: 10, color: '#1890ff' }}
                 />
                 {`已选择 ${selectedRowKeys.length} 项`}
               </span>
@@ -302,10 +306,10 @@ class Chapter extends Component {
           <Table
             rowSelection={rowSelection}
             columns={columns}
-            dataSource={this.props.chapterlist}
+            dataSource={this.props.chapterList}
             rowKey="_id"
             expandable={{
-              onExpand: this.onExpand
+              onExpand: this.onExpand,
             }}
           />
         </div>
@@ -315,7 +319,7 @@ class Chapter extends Component {
           footer={null}
           onCancel={this.handleImgModal}
         >
-          <img alt="example" style={{ width: "100%" }} src={previewImage} />
+          <img alt="example" style={{ width: '100%' }} src={previewImage} />
         </Modal>
       </div>
     );

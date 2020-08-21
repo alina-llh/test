@@ -1,27 +1,25 @@
-import {
-  SUBJRCTLIST,
-  EDUSUBJCTLIST,
-  UPDATESUBJECT,
-  DELETESUBJECT
-} from "./constants";
+import { GET_SUBJECT_LIST, GET_EDUSUBJECT_LIST, GET_UPDATESUBJECT_LIST, GET_DELETESUBJECT_LIST } from './constants'
 
 const initSubjectList = {
   total: 0, // 总数
-  items: [], // 详细user数据
-};
+  items: [] // 课程分类数据
+}
 
 export default function subjectList (prevState = initSubjectList, action) {
   switch (action.type) {
-    case SUBJRCTLIST://列表展现数据
+    case GET_SUBJECT_LIST:
       action.data.items.forEach(item => {
+        // 每一项加一个children
         item.children = []
       })
-      return action.data;
-    case EDUSUBJCTLIST://二级列表展现数据
+      return action.data
+
+    case GET_EDUSUBJECT_LIST:
+      // 二级分类列表
       let children = action.data.items
       let parent = prevState.items
+      // 如果存在则显示不存在则不显示
       children.length && parent.forEach(item => {
-        // 如果当前项的父元素ID===二级展现数据的父元素Id
         if (item._id === children[0].parentId) {
           item.children = children
         }
@@ -31,44 +29,41 @@ export default function subjectList (prevState = initSubjectList, action) {
         items: parent
       }
     // 更新数据
-    case UPDATESUBJECT:
-      console.log(action, prevState)
-      prevState.items.forEach(item => {
-
-        // 如果当前id===action里的id
-        if (item._id === action.data.id) {
+    case GET_UPDATESUBJECT_LIST:
+      const newState = [...prevState.items]
+      newState.forEach(item => {
+        if (item._id === action.data.parentId) {
           item.title = action.data.title
-          return
         }
-        item.children.forEach(setItem => {
-          console.log(setItem)
-          if (setItem._id === action.data.id) {
-            setItem.title = action.data.title
-            return
+        item.children.forEach(childrenItem => {
+          if (childrenItem._id === action.data.parentId) {
+            childrenItem.title = action.data.title
           }
         })
       })
       return {
-        ...prevState
+        ...prevState,
+        items: newState
       }
     // 删除数据
-    case DELETESUBJECT:
-      const newItems = [...prevState.items]
-      newItems.forEach((item, index) => {
+    case GET_DELETESUBJECT_LIST:
+      const delState = [...prevState.items]
+      delState.forEach((item, index) => {
         if (item._id === action.data) {
-          newItems.splice(index, 1)
+          delState.splice(index, 1)
         }
-        item.children.forEach((childrenItem, index) => {
-          if (childrenItem._id === action.data) {
+        item.children.forEach((childrenitem, index) => {
+          if (childrenitem._id === action.data) {
             item.children.splice(index, 1)
           }
         })
       })
       return {
         ...prevState,
-        items: newItems
+        items: delState
       }
     default:
-      return prevState;
+      return prevState
   }
 }
+
