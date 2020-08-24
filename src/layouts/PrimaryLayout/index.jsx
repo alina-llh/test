@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Layout, Menu, Dropdown, Breadcrumb } from "antd";
+import React, { Component } from 'react';
+import { Layout, Menu, Dropdown, Breadcrumb } from 'antd';
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -7,30 +7,34 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
-} from "@ant-design/icons";
-import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
+} from '@ant-design/icons';
+import { connect } from 'react-redux';
+import { Link, withRouter } from 'react-router-dom';
 
-import SiderMenu from "../SiderMenu";
-import { AuthorizedRouter } from "@comps/Authorized";
-import { logout } from "@redux/actions/login";
-import { resetUser } from "../../components/Authorized/redux";
-import logo from "@assets/images/logo.png";
-import { findPathIndex } from "@utils/tools";
+import SiderMenu from '../SiderMenu';
+import { AuthorizedRouter } from '@comps/Authorized';
+import { logout } from '@redux/actions/login';
+import { resetUser } from '../../components/Authorized/redux';
+import logo from '@assets/images/logo.png';
+import { findPathIndex } from '@utils/tools';
 
 // 引入组件公共样式
-import "@assets/css/common.less";
-import "./index.less";
+import '@assets/css/common.less';
+import './index.less';
+
+import { setIntl } from '@redux/actions/intl';
 
 const { Header, Sider, Content } = Layout;
 
 @connect(
   (state) => ({
     user: state.user,
+    intl: state.intl,
   }),
   {
     logout,
     resetUser,
+    setIntl,
   }
 )
 @withRouter
@@ -46,14 +50,18 @@ class PrimaryLayout extends Component {
   };
 
   logout = ({ key }) => {
-    if (key !== "2") return;
+    if (key !== '2') return;
     this.props.logout().then(() => {
-      localStorage.removeItem("user_token");
+      localStorage.removeItem('user_token');
       this.props.resetUser();
-      this.props.history.replace("/login");
+      this.props.history.replace('/login');
     });
   };
-
+  toggleIntl = (value) => {
+    this.props.setIntl(value.key);
+    // 发请求更改转tai
+    console.log(value);
+  };
   menu = (
     <Menu style={{ width: 150 }} onClick={this.logout}>
       <Menu.Item key="0">
@@ -96,7 +104,7 @@ class PrimaryLayout extends Component {
               --> /acl/role
             pathname: /acl/role/auth/xxx  
           */
-          const index = findPathIndex(path, "/");
+          const index = findPathIndex(path, '/');
           path = path.slice(0, index);
           if (pathname.indexOf(path) !== -1) {
             return {
@@ -110,7 +118,7 @@ class PrimaryLayout extends Component {
   };
 
   renderBreadcrumb = (route) => {
-    if (this.props.location.pathname === "/") {
+    if (this.props.location.pathname === '/') {
       return (
         <Breadcrumb>
           <Breadcrumb.Item>首页</Breadcrumb.Item>
@@ -131,7 +139,15 @@ class PrimaryLayout extends Component {
     );
   };
 
-  render() {
+  render () {
+    // 语言更改逻辑
+    const intlMenu = (
+      <Menu selectedKeys={[this.props.intl]} onClick={this.toggleIntl}>
+        <Menu.Item key="zh">中文</Menu.Item>
+        <Menu.Item key="en">English</Menu.Item>
+      </Menu>
+    );
+
     const { collapsed } = this.state;
     const {
       routes,
@@ -146,7 +162,7 @@ class PrimaryLayout extends Component {
         <Sider trigger={null} collapsible collapsed={collapsed}>
           <div className="logo">
             <img src={logo} alt="logo" />
-            <h1 style={{ display: collapsed ? "none" : "block" }}>
+            <h1 style={{ display: collapsed ? 'none' : 'block' }}>
               硅谷教育管理系统
             </h1>
           </div>
@@ -158,7 +174,7 @@ class PrimaryLayout extends Component {
               {React.createElement(
                 collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
                 {
-                  className: "trigger",
+                  className: 'trigger',
                   onClick: this.toggle,
                 }
               )}
@@ -169,9 +185,11 @@ class PrimaryLayout extends Component {
                     <span>{user.name}</span>
                   </span>
                 </Dropdown>
-                <span className="site-layout-lang">
-                  <GlobalOutlined />
-                </span>
+                <Dropdown overlay={intlMenu}>
+                  <span className="site-layout-lang">
+                    <GlobalOutlined />
+                  </span>
+                </Dropdown>
               </span>
             </span>
           </Header>

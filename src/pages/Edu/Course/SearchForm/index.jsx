@@ -1,53 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Cascader, Button } from 'antd';
+import { connect } from 'react-redux';
 
+// 在要实现国际化的页面中
+// 引入FormattedMessage
+import { FormattedMessage, useIntl } from 'react-intl';
+
+import { reqGetAllTeacherList } from '@api/edu/teacher';
+import { reqSubject, reqEduSubject } from '@api/edu/subject';
+import { getCourseAllList } from '../redux';
 import './index.less';
-import { getSubject, reqEduSubject } from '@api/edu/subject';
-import { getTeacher } from '@api/edu/teacher';
 const { Option } = Select;
 
-function SearchForm() {
-  const [form] = Form.useForm();
-  // http://localhost:5000/admin/edu/teacher/list
+function SearchForm(props) {
+  const intl = useIntl();
 
+  const [form] = Form.useForm();
+
+  // 定义teacher数据
+  const [teacher, setTeacher] = useState([]);
   const [options, setOptions] = useState([]);
-  // const [subject, setSubject] = useState([]); //所有课程数据
-  const [teacher, setTeacher] = useState([]); //所有老师数据
-  // 模拟生命周期钩子
+  // 添加生命周期钩子
   useEffect(() => {
-    async function deteNow() {
-      const [getSubjectList, getTeacherList] = await Promise.all([
-        getSubject(),
-        getTeacher(),
+    async function fetchData() {
+      // 发请求获取数据
+      const [teachers, subject] = await Promise.all([
+        reqGetAllTeacherList(),
+        reqSubject(),
       ]);
-      const newSubjectList = getSubjectList.map((item) => {
+      const subjects = subject.map((item) => {
         return {
           value: item._id,
           label: item.title,
           isLeaf: false,
         };
       });
-      setOptions(newSubjectList);
-      setTeacher(getTeacherList);
+      setTeacher(teachers);
+      setOptions(subjects);
     }
-
-    deteNow();
+    fetchData();
   }, []);
   const onChange = (value, selectedOptions) => {
     console.log(value, selectedOptions);
   };
 
   const loadData = async (selectedOptions) => {
+    // selectedOptions 所有选中的id
+    // 但前选中的id
     const targetOption = selectedOptions[selectedOptions.length - 1];
-    // 请求之前打开 加载图标
     targetOption.loading = true;
-    // 拿到的是选中的数组
-    console.log(targetOption);
+    // 发请求获取数据reqEduSubject
     const res = await reqEduSubject(targetOption.value);
-    // 停止加载图标
     targetOption.loading = false;
     if (res.items.length) {
-      // 遍历获取到的数据加载到当前项的chilren上
+      // 选中这一项加children属性
       targetOption.children = res.items.map((item) => {
         return {
           value: item._id,
@@ -55,21 +61,48 @@ function SearchForm() {
         };
       });
     } else {
-      // 不展示小箭头 没有二级
       targetOption.isLeaf = true;
     }
-    //视图重新渲染
+    // 重新渲染页面
     setOptions([...options]);
+    // // load options lazily
+    // setTimeout(() => {
+    //   targetOption.loading = false;
+    //   targetOption.children = [
+    //     {
+    //       label: `${targetOption.label} Dynamic 1`,
+    //       value: 'dynamic1',
+    //     },
+    //     {
+    //       label: `${targetOption.label} Dynamic 2`,
+    //       value: 'dynamic2',
+    //     },
+    //   ];
+    //   setOptions([...options]);
+    // }, 1000);
   };
 
   const resetForm = () => {
     form.resetFields();
   };
 
+  // 提交按钮
+  const onFinish = async () => {
+    console.log(111);
+    // 发送请求，修改redux数据
+    await props.getCourseAllList();
+    // console.log(props);
+  };
+
   return (
-    <Form layout="inline" form={form}>
-      <Form.Item name="title" label="标题">
-        <Input placeholder="课程标题" style={{ width: 250, marginRight: 20 }} />
+    <Form layout="inline" form={form} onFinish={onFinish}>
+      <Form.Item name="title" label={<FormattedMessage id={'title'} />}>
+        <Input
+          placeholder={intl.formatMessage({
+            id: 'title',
+          })}
+          style={{ width: 250, marginRight: 20 }}
+        />
       </Form.Item>
       <Form.Item name="teacherId" label="讲师">
         <Select
@@ -77,13 +110,11 @@ function SearchForm() {
           placeholder="课程讲师"
           style={{ width: 250, marginRight: 20 }}
         >
-          {teacher.map((item) => {
-            return (
-              <Option value={item._id} key={item._id}>
-                {item.name}
-              </Option>
-            );
-          })}
+          {teacher.map((item) => (
+            <Option value={item._id} key={item._id}>
+              {item.name}
+            </Option>
+          ))}
         </Select>
       </Form.Item>
       <Form.Item name="subject" label="分类">
@@ -110,4 +141,4 @@ function SearchForm() {
   );
 }
 
-export default SearchForm;
+export default connect(null, { getCourseAllList })(SearchForm);

@@ -10,13 +10,12 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import Player from 'griffith';
 
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { getLessonList, delLessonList, delChapterList } from './redux';
 
 import { connect } from 'react-redux';
 import SearchForm from './SearchForm';
-import { LessonList, delChapterLists, delLessonLists } from './redux';
 
 import './index.less';
 
@@ -24,13 +23,13 @@ dayjs.extend(relativeTime);
 
 @connect(
   (state) => ({
-    chapterlist: state.chapter.chapterlist,
+    chapterList: state.chapter.chapterList,
     // permissionValueList: filterPermissions(
     //   state.course.permissionValueList,
     //   "Course"
     // )
   }),
-  { LessonList, delChapterLists, delLessonLists }
+  { getLessonList, delLessonList, delChapterList }
 )
 class Chapter extends Component {
   state = {
@@ -38,7 +37,6 @@ class Chapter extends Component {
     previewVisible: false,
     previewImage: '',
     selectedRowKeys: [],
-    play_url: '',
   };
 
   showImgModal = (img) => {
@@ -60,7 +58,11 @@ class Chapter extends Component {
     // const { page, limit } = this.state;
     // this.handleTableChange(page, limit);
   }
-
+  // 跳转到add页面组件
+  handleGoAddChapter = (data) => () => {
+    // console.log(data);
+    this.props.history.push('/edu/chapter/addlesson', data._id);
+  };
   handleTableChange = (page, limit) => {
     this.setState({
       tableLoading: true,
@@ -89,67 +91,37 @@ class Chapter extends Component {
 
   onSelectChange = (selectedRowKeys) => {
     this.setState({
-      selectedRowKeys, //选中的id数组
+      selectedRowKeys, //选中的数组数据
     });
   };
-  // 点击展开按钮 +
-  onExpand = (expanded, record) => {
-    // 展开才执行之后的代码
+  // +展开时函数
+  onExpand = async (expanded, record) => {
     if (expanded) {
-      this.props.LessonList(record._id);
+      await this.props.getLessonList(record._id);
     }
   };
-
-  //跳转到添加页面
-  handelGoToAddLesson = (data) => () => {
-    console.log(this.props.history, data._id);
-    this.props.history.push('/edu/chapter/addlesson', data._id);
-  };
-
-  // 点击预览视频按钮
-  handeProvieVideo = (record) => () => {
-    console.log(record.video);
-    this.setState({
-      play_url: record.video,
-      previewVisible: true,
-    });
-  };
-
-  // 批量删除
-  batchDel = async () => {
-    // 拿到chapterlist
-    const chapterIdList = [];
-
-    this.props.chapterlist.forEach((item) => {
-      if (this.state.selectedRowKeys.indexOf(item._id) > -1) {
-        chapterIdList.push(item._id);
+  handleAlldel = async () => {
+    // 获取章节的数组
+    const chapter = [];
+    this.props.chapterList.forEach((items) => {
+      if (this.state.selectedRowKeys.indexOf(items._id) > -1) {
+        chapter.push(items._id);
       }
     });
-    // 获取lessonIdList
-    const lessonIdList = this.state.selectedRowKeys.filter((item) => {
-      if (chapterIdList.indexOf(item) > -1) {
+    // 获取课时的数组
+    const lesson = this.state.selectedRowKeys.filter((item) => {
+      if (chapter.indexOf(item) > -1) {
         return false;
       }
       return true;
     });
-    // delChapterLists, delLessonLists
-    await this.props.delChapterLists(chapterIdList);
-    await this.props.delLessonLists(lessonIdList);
-    // console.log(chapterIdList, lessonIdList);
+    // 发请求更新页面修改redux数据delLessonList, delChapterList
+    await this.props.delChapterList(chapter);
+    await this.props.delLessonList(lesson);
   };
-
   render() {
-    const {
-      previewVisible,
-      previewImage,
-      selectedRowKeys,
-      play_url,
-    } = this.state;
-    const sources = {
-      hd: {
-        play_url: play_url,
-      },
-    };
+    const { previewVisible, previewImage, selectedRowKeys } = this.state;
+
     const columns = [
       {
         title: '章节名称',
@@ -165,9 +137,9 @@ class Chapter extends Component {
       {
         title: '视频',
         render: (record) => {
-          return record.free ? (
-            <Button onClick={this.handeProvieVideo(record)}>预览视频</Button>
-          ) : null;
+          if (record.free) {
+            return <Button>预览视频</Button>;
+          }
         },
       },
       {
@@ -177,8 +149,8 @@ class Chapter extends Component {
         render: (data) => {
           return (
             <div>
-              <Tooltip title="新增章节">
-                <Button type="primary" onClick={this.handelGoToAddLesson(data)}>
+              <Tooltip title="新建章节">
+                <Button type="primary" onClick={this.handleGoAddChapter(data)}>
                   <PlusOutlined />
                 </Button>
               </Tooltip>
@@ -276,6 +248,39 @@ class Chapter extends Component {
     const rowSelection = {
       selectedRowKeys,
       onChange: this.onSelectChange,
+      // hideDefaultSelections: true,
+      // selections: [
+      //   Table.SELECTION_ALL,
+      //   Table.SELECTION_INVERT,
+      //   {
+      //     key: "odd",
+      //     text: "Select Odd Row",
+      //     onSelect: changableRowKeys => {
+      //       let newSelectedRowKeys = [];
+      //       newSelectedRowKeys = changableRowKeys.filter((key, index) => {
+      //         if (index % 2 !== 0) {
+      //           return false;
+      //         }
+      //         return true;
+      //       });
+      //       this.setState({ selectedRowKeys: newSelectedRowKeys });
+      //     }
+      //   },
+      //   {
+      //     key: "even",
+      //     text: "Select Even Row",
+      //     onSelect: changableRowKeys => {
+      //       let newSelectedRowKeys = [];
+      //       newSelectedRowKeys = changableRowKeys.filter((key, index) => {
+      //         if (index % 2 !== 0) {
+      //           return true;
+      //         }
+      //         return false;
+      //       });
+      //       this.setState({ selectedRowKeys: newSelectedRowKeys });
+      //     }
+      //   }
+      // ]
     };
 
     return (
@@ -294,7 +299,7 @@ class Chapter extends Component {
               <Button
                 type="danger"
                 style={{ marginRight: 10 }}
-                onClick={this.batchDel}
+                onClick={this.handleAlldel}
               >
                 <span>批量删除</span>
               </Button>
@@ -324,7 +329,7 @@ class Chapter extends Component {
           <Table
             rowSelection={rowSelection}
             columns={columns}
-            dataSource={this.props.chapterlist}
+            dataSource={this.props.chapterList}
             rowKey="_id"
             expandable={{
               onExpand: this.onExpand,
@@ -334,13 +339,10 @@ class Chapter extends Component {
 
         <Modal
           visible={previewVisible}
-          title="预览视频"
           footer={null}
           onCancel={this.handleImgModal}
-          destroyOnClose={true}
         >
-          {/* <img alt="example" style={{ width: '100%' }} src={previewImage} /> */}
-          <Player sources={sources} />
+          <img alt="example" style={{ width: '100%' }} src={previewImage} />
         </Modal>
       </div>
     );

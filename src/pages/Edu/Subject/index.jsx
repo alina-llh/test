@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
-import { Button, Table, Tooltip, Input, message, Modal } from 'antd'
+import { Button, Input, Table, Tooltip, Modal } from 'antd'
 import { PlusOutlined, FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { connect } from 'react-redux'
 
-import { getSubjectList, getEdujectList, getUpdateSubject, getDeleteSubject } from './redux'
+import { getSubjectList, getEduSubjectList, getUpdateSubjectList, delteSubjectList } from './redux'
 
-import { reqUpdateSubject } from '@api/edu/subject'
 import './index.less'
-
 
 const data = [
   {
@@ -44,108 +42,96 @@ const data = [
 ]
 
 // 使用高阶组件时,如果用修饰器语法: 传入展示组件的调用可以不写了
-@connect(state => ({ subjectList: state.subjectList }), { getSubjectList, getEdujectList, getUpdateSubject, getDeleteSubject })
+@connect(
+  state => ({ subjectList: state.subjectList }),
+  { getSubjectList, getEduSubjectList, getUpdateSubjectList, delteSubjectList }
+)
 class Subject extends Component {
   state = {
-    subjectId: '',
+    id: '',
     title: ''
   }
+
+  // 点击修改按钮
+  reviseCourse = ({ _id, title }) => () => {
+    this.setState({ id: _id, title })
+  }
+  // 当前
   page = 1
   componentDidMount () {
-    // 发请求获取数据
-    this.props.getSubjectList(1, 5)
+    // 组件挂载的时候,去调用异步anction,发送请求
+    this.props.getSubjectList(1, 10)
   }
-  // 点击展开按钮
-  handelonExpand = (expanded, record) => {
-    // console.log(expanded, record);
+
+  // 页码发生变化时,触发的回调函数
+  handleChange = (page, pageSize) => {
+    this.page = page
+    this.props.getSubjectList(page, pageSize)
+  }
+  // 个数发生变化的回调
+  handleShowSizeChange = (page, pageSize) => {
+    // this.page=page
+    // console.log(pa1ge, pageSize)
+    this.props.getSubjectList(page, pageSize)
+  }
+  // 展开选项的变化
+  handleonExpandChange = (expanded, record) => {
+    // expanded如果是展开则发送请求
     if (expanded) {
-      // 展开的话发请求给后台获取二级列表
-      this.props.getEdujectList(record._id)
+      this.props.getEduSubjectList(record._id)
     }
   }
-  //点击页码修改数据
-  handelChange = (page, pagesize) => {
-    this.page = page
-    this.props.getSubjectList(page, pagesize)
-  }
-  // 点击修改页面个数
-  handelShowSizeChange = (page, pagesize) => {
-    this.page = page
-    this.props.getSubjectList(page, pagesize)
-  }
-  // 点击新建按钮
-  skipAddsubject = () => {
-    console.log(this.props)
+  // addButton添加按钮
+  addButton = () => {
     this.props.history.push('/edu/subject/add')
   }
-  // 更新课程 state中添加id
-  updateCoures = ({ _id, title }) => () => {
-    this.setState({ subjectId: _id, title })
-    this.title = title
-  }
-  // input框框修改
-  changeUpdateCoures = (e) => {
-
+  // input发生修改
+  handeChange = (e) => {
     this.setState({
       title: e.target.value
     })
   }
-  // 取消按钮
-  handelCancel = () => {
+  // 保存按钮，直接发请求
+  preservation = async () => {
+    // 发请求 修改数据 在redux中发请求
+    await this.props.getUpdateSubjectList(this.state.title, this.state.id)
     this.setState({
-      subjectId: '',
-      title: ''
+      title: '',
+      id: ''
+    })
+    // this.props.getSubjectList(1, 5)
+  }
+  // 取消按钮
+  handeCancel = () => {
+    this.setState({
+      title: '',
+      id: ''
     })
   }
-  // 确认按钮
-  handelConfirm = async () => {
-    if (!this.state.title.trim()) {
-      message.success('请不要输入空信息');
-      return
-    }
-    if (this.state.title === this.title) {
-      message.success('请不要输入重复信息');
-      return
-    }
-    let id = this.state.subjectId
-    let title = this.state.title
-    console.log(title)
-    // 发请求 
-    // await reqUpdateSubject(title, id)
-    const result = await this.props.getUpdateSubject(title, id)
-    if (result) {
-      message.success('提交成功');
-      this.setState({
-        subjectId: '',
-        title: ''
-      })
-    }
-
-
-  }
-  // 删除按钮的操作
-  delHandel = record => () => {
-    // 发请求更新数据
+  // 删除按钮
+  delteCourse = (recode) => () => {
     Modal.confirm({
-      title: <div>需要删除<span style={{ color: 'red', margin: '0 10px' }}>{record.title}</span>课程吗？</div>,
+      title: <div>需要删除<span style={{ margin: '0 10px', color: "red" }}>{recode.title}</span>吗？</div>,
       icon: <ExclamationCircleOutlined />,
       onOk: async () => {
-        await this.props.getDeleteSubject(record._id)
-        // 删除了一级课程才需要更新页面数据发请求
-        if (record.parentId === '0') {
-          // 当前数据的长度小于0和页面不在第一页则删除时在去到上一页
-          if (this.props.subjectList.items.length <= 0 && this.page > 1) {
-            this.props.getSubjectList(--this.page, 5)
+        // 删除按钮发请求
+        await this.props.delteSubjectList(recode._id)
+        if (recode.parentId === '0') {
+          console.log(this.props.subjectList.items.length);
+          if (this.page > 1 && this.props.subjectList.items.length === 0) {
+            console.log(11);
+            await this.props.getSubjectList(--this.page, 10)
           } else {
-            this.props.getSubjectList(this.page, 5)
+            await this.props.getSubjectList(this.page, 10)
           }
         }
-      }
+
+
+      },
     })
   }
 
   render () {
-
     const columns = [
       /**
        * title: 表示这一列的标题
@@ -154,14 +140,14 @@ class Subject extends Component {
        */
       // 注意: 后台返回的数据,课程分类名称的属性是title.不是name.所以记得改一下
       {
-        title: '分类名称', key: 'name',
-        render: (record) => {
-          if (this.state.subjectId === record._id) {
-            return <Input value={this.state.title} style={{ width: 250 }} onChange={this.changeUpdateCoures}></Input>
+        title: '分类名称', render: (record) => {
+          if (this.state.id === record._id) {
+            return <>
+              <Input value={this.state.title} style={{ width: 150 }} onChange={this.handeChange}></Input>
+            </>
           } else {
-            return <span onClick={this.updateCoures(record)}>{record.title}</span>
+            return <> <span>{record.title}</span></>
           }
-
         }
       },
       {
@@ -169,34 +155,30 @@ class Subject extends Component {
         // 注意: 如果这一列不展示data中的数据,那么就可以不写dataIndex,或者是值为空的字符串
         // dataIndex: 'age',
         key: 'x',
-        render: (record) => {
-          if (this.state.subjectId === record._id) {
-            return (
-              <>
-                <Button type="primary" onClick={this.handelConfirm}>确认</Button>
-                <Button style={{ marginLeft: 20 }} onClick={this.handelCancel}> 取消</Button>
-              </>
-            )
+        render: (recode) => {
+          if (this.state.id === recode._id) {
+            return <>
+              <Button type='primary' onClick={this.preservation}>保存</Button>
+              <Button style={{ marginLeft: 10 }} onClick={this.handeCancel}>取消</Button>
+            </>
           } else {
             return (
               <>
-                <Tooltip title='更新课程'>
+                <Tooltip title='更新课程' onClick={this.reviseCourse(recode)}>
                   <Button
                     type='primary'
                     icon={<FormOutlined />}
                     style={{ marginRight: 20, width: 40 }}
-                    onClick={this.updateCoures(record)}
                   // size='large'
                   // style={{ width: 40 }}
                   ></Button>
                 </Tooltip>
-                <Tooltip title='删除课程'>
+                <Tooltip title='删除课程' onClick={this.delteCourse(recode)}>
                   <Button
                     type='danger'
                     icon={<DeleteOutlined />}
                     // size='large'
                     style={{ width: 40 }}
-                    onClick={this.delHandel(record)}
                   ></Button>
                 </Tooltip>
               </>
@@ -209,27 +191,37 @@ class Subject extends Component {
     ]
     return (
       <div className='subject'>
-        <Button type='primary' icon={<PlusOutlined />} className='subject-btn' onClick={this.skipAddsubject}>
+        <Button type='primary' icon={<PlusOutlined />} className='subject-btn' onClick={this.addButton}>
           新建
         </Button>
 
         <Table
           // 表示表格的列的数据
           columns={columns}
-          rowKey='_id'
-          dataSource={this.props.subjectList.items}
           expandable={{
-            onExpand: this.handelonExpand
+            onExpand: this.handleonExpandChange//点击展开的变化
           }}
+          dataSource={this.props.subjectList.items}
+          // 注意: table组件,在渲染数据的时候,默认使dataSource数据中的key属性的值作为底层列表渲染key的值. 但是我们后台返回的数据没有key属性.table组件支持,我们通过rowkey指定使用我们自己数据中某个属性作为key的值
+          rowKey='_id'
           pagination={{
-            total: this.props.subjectList.total,//总页数
-            defaultPageSize: 5,//默认每页显示个数
-            pageSizeOptions: ['3', '5', '7'],
-            current: this.page,// current控制分页器,哪个页码高亮
-            showQuickJumper: true,//是否可以快速跳转至某页
-            onChange: this.handelChange,//点击修改页码
-            showSizeChanger: true,//是否展示 pageSize 切换器
-            onShowSizeChange: this.handelShowSizeChange
+            // 表示总共有多少条数据, pagination,底层默认一页是10条数据,所以数据是30条,就分3页
+            total: this.props.subjectList.total,
+            // 是否展示一页展示几条数据的修改项
+            showSizeChanger: true,
+            // 控制一页展示几条的选项
+            pageSizeOptions: ['3', '5', '10'],
+            // 展示快速跳转到那一页
+            showQuickJumper: true,
+            defaultPageSize: 10, // 默认分页器认为每页是10条,改为5条,
+            // onChange: (page, pageSize) => {
+            //   console.log(page, pageSize)
+            // }
+            // 是页码变化的时候会触发的回调函数
+            onChange: this.handleChange,
+            // 一页展示的数据条数变化的时候触发的函数
+            onShowSizeChange: this.handleShowSizeChange,
+            current: this.page
           }}
         />
       </div>
