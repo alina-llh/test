@@ -3,14 +3,12 @@ import request from '@utils/request'
 
 const BASE_URL = '/admin/edu/course'
 
-// 假设本地服务器接口还没写完.先使用mock
-// const MOCK_URL = 'http://localhost:8888/admin/edu/subject'
+// http://localhost:5000/admin/edu/course
 
-// 获取课程列表 http://localhost:5000/admin/edu/course
-export function reqGetCourse () {
+// 获取
+export function reqGetCourseList () {
   return request({
     url: `${BASE_URL}`,
     method: 'GET'
   })
 }
-

@@ -17,12 +17,10 @@ import { logout } from '@redux/actions/login';
 import { resetUser } from '../../components/Authorized/redux';
 import logo from '@assets/images/logo.png';
 import { findPathIndex } from '@utils/tools';
-
+import { intlLanguage } from '@redux/actions/intl';
 // 引入组件公共样式
 import '@assets/css/common.less';
 import './index.less';
-
-import { setIntl } from '@redux/actions/intl';
 
 const { Header, Sider, Content } = Layout;
 
@@ -34,7 +32,7 @@ const { Header, Sider, Content } = Layout;
   {
     logout,
     resetUser,
-    setIntl,
+    intlLanguage,
   }
 )
 @withRouter
@@ -57,11 +55,7 @@ class PrimaryLayout extends Component {
       this.props.history.replace('/login');
     });
   };
-  toggleIntl = (value) => {
-    this.props.setIntl(value.key);
-    // 发请求更改转tai
-    console.log(value);
-  };
+
   menu = (
     <Menu style={{ width: 150 }} onClick={this.logout}>
       <Menu.Item key="0">
@@ -139,15 +133,18 @@ class PrimaryLayout extends Component {
     );
   };
 
-  render () {
-    // 语言更改逻辑
-    const intlMenu = (
-      <Menu selectedKeys={[this.props.intl]} onClick={this.toggleIntl}>
+  // 修改语言
+  handelLanguage = (values) => {
+    // 发请求修改的数据 intlLanguage
+    this.props.intlLanguage(values.key);
+  };
+  render() {
+    const menus = (
+      <Menu selectedKeys={[this.props.intl]} onClick={this.handelLanguage}>
         <Menu.Item key="zh">中文</Menu.Item>
         <Menu.Item key="en">English</Menu.Item>
       </Menu>
     );
-
     const { collapsed } = this.state;
     const {
       routes,
@@ -185,7 +182,7 @@ class PrimaryLayout extends Component {
                     <span>{user.name}</span>
                   </span>
                 </Dropdown>
-                <Dropdown overlay={intlMenu}>
+                <Dropdown overlay={menus}>
                   <span className="site-layout-lang">
                     <GlobalOutlined />
                   </span>

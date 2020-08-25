@@ -1,1 +1,1 @@
-export const SET_INTL = 'SET_INTL'
+export const INLI = 'INLI'

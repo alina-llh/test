@@ -1,59 +1,66 @@
-import { reqGetCourse } from '@api/edu/course'
-import { reqGetChapter, reqDelChapter } from '@api/edu/chapter'
-import { reqGetLesson, reqDelLesson, } from '@api/edu/lesson'
-import { GET_COURSELIST, GET_CHAPTERLIST, GET_LESSONLIST, DEL_CHAPTERLIST, DEL_LESSONLIST } from './contants'
-// 获取课程列表
-function courseListSync (data) {
-  return { type: GET_COURSELIST, data }
+import { reqGetCourseList } from '@api/edu/course'
+import { reqGetChapterList, delChapterList } from '@api/edu/chapter'
+import { reqGetLessonList, delLessonList } from '@api/edu/lesson'
+import { COURSELEST, CHAPTERLIST, LESSONLIST,DELERECHAPTER, DELERELESSON } from './constants'
+// 获取所有课程列表
+function CourseListSync (data) {
+  return { type: COURSELEST, data }
 }
-export function courseList () {
+export function CourseList () {
   return dispatch => {
-    reqGetCourse().then((res) => {
-      dispatch(courseListSync(res))
-    })
-  }
-}
-// 获取章节列表
-function chapterListSync (data) {
-  return { type: GET_CHAPTERLIST, data }
-}
-export function getChapterList (id) {
-  return dispatch => {
-    reqGetChapter(id).then((res) => {
-      dispatch(chapterListSync(res.items))
-    })
-  }
-}
-// 获取课时列表
-function lessonListSync (data) {
-  return { type: GET_LESSONLIST, data }
-}
-export function getLessonList (id) {
-  return dispatch => {
-    return reqGetLesson(id).then((res) => {
-      dispatch(lessonListSync({ res, id }))
+    reqGetCourseList().then(response => {
+      dispatch(CourseListSync(response))
     })
   }
 }
 
-// 批量删除课程 课时
+// 获取章节列表
+function chapterListSync (data) {
+  return { type: CHAPTERLIST, data }
+}
+export function chapterList (chapterId) {
+  return dispatch => {
+    return reqGetChapterList(chapterId).then(response => {
+      dispatch(chapterListSync(response.items))
+    })
+  }
+}
+
+// 章节子列表
+function LessonListSync (data) {
+  return { type: LESSONLIST, data }
+}
+export function LessonList (id) {
+  return dispatch => {
+    return reqGetLessonList(id).then(response => {
+      dispatch(LessonListSync({ response, id }))
+    })
+  }
+}
+
+// 删除章节
 function delChapterListSync (data) {
-  return { type: DEL_CHAPTERLIST, data }
+  return { type: DELERECHAPTER, data }
 }
+// 删除课时
 function delLessonListSync (data) {
-  return { type: DEL_LESSONLIST, data }
+  return { type: DELERELESSON, data }
 }
-export function delChapterList (id) {
+
+// 批量删除章节
+export function delChapterLists (idList) {
   return dispatch => {
-    return reqDelChapter(id).then((res) => {
-      dispatch(delChapterListSync(id))
+    return delChapterList(idList).then(response => {
+      dispatch(delChapterListSync(idList))
     })
   }
 }
-export function delLessonList (id) {
+// 批量删除课时
+export function delLessonLists (idList) {
   return dispatch => {
-    return reqDelLesson(id).then((res) => {
-      dispatch(delLessonListSync(id))
+    return delLessonList(idList).then(response => {
+      dispatch(delLessonListSync(idList))
     })
   }
 }
+

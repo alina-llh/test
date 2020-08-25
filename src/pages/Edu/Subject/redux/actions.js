@@ -1,14 +1,19 @@
-import { reqGetSubject, reqEduSubject, reqUpdateSubject, deleteSubject} from '@api/edu/subject'
+import {
+  reqGetSubject, reqEduSubject, reqUpdateSubject, deleteSubject
+} from '@api/edu/subject'
 
-import { GET_SUBJECT_LIST, GET_EDUSUBJECT_LIST, GET_UPDATESUBJECT_LIST ,GET_DELETESUBJECT_LIST} from './constants'
+import {
+  SUBJRCTLIST, EDUSUBJCTLIST, UPDATESUBJECT, DELETESUBJECT
+} from './constants'
 /**
  * 获取/搜索 用户分页数据
  */
 const getSubjectListSync = list => ({
-  type: GET_SUBJECT_LIST,
+  type: SUBJRCTLIST,
   data: list
 })
 
+// 获取课程数据列表
 export const getSubjectList = (page, limit) => {
   return dispatch => {
     return reqGetSubject(page, limit).then(response => {
@@ -17,49 +22,46 @@ export const getSubjectList = (page, limit) => {
     })
   }
 }
-
-// 获取二级分类列表
-const getEduSubjectListSync = list => ({
-  type: GET_EDUSUBJECT_LIST,
+const getEdujectListSync = list => ({
+  type: EDUSUBJCTLIST,
   data: list
 })
-
-export const getEduSubjectList = (parentId) => {
+// 获取二级课程数据列表
+export const getEdujectList = (parentId) => {
   return dispatch => {
     return reqEduSubject(parentId).then(response => {
-      dispatch(getEduSubjectListSync(response))
+      dispatch(getEdujectListSync(response))
       return response.total
     })
   }
 }
 
-// 更新数据
-
-const getUpdateSubjectListSync = data => ({
-  type: GET_UPDATESUBJECT_LIST,
+// 更新页面发送请求
+const getUpdateSubjectSync = data => ({
+  type: UPDATESUBJECT,
   data
 })
-
-export const getUpdateSubjectList = (title, parentId) => {
+// 更新一级二级课程数据列表
+export const getUpdateSubject = (title, id) => {
   return dispatch => {
-    return reqUpdateSubject(title, parentId).then(response => {
-      dispatch(getUpdateSubjectListSync({ parentId, title }))
+    return reqUpdateSubject(title, id).then(response => {
+      dispatch(getUpdateSubjectSync({ title, id }))
       return response
     })
   }
 }
-
-// 删除数据
-const delteSubjectListSync = data => ({
-  type: GET_DELETESUBJECT_LIST,
+// 删除页面发送请求
+const deleteSubjectSync = data => ({
+  type: DELETESUBJECT,
   data
 })
-
-export const delteSubjectList = (id) => {
+// 删除一级二级课程数据列表
+export const getDeleteSubject = (id) => {
   return dispatch => {
     return deleteSubject(id).then(response => {
-      dispatch(delteSubjectListSync(id))
+      dispatch(deleteSubjectSync(id))
       return response
     })
   }
 }
+

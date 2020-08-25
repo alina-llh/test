@@ -1,5 +1,9 @@
-import chapter from './reducer'
-import { courseList, getChapterList, getLessonList, delLessonList, delChapterList } from './actions'
+import { CourseList, chapterList, LessonList, delChapterLists, delLessonLists } from './actions'
+import chapter from './reducers'
 export {
-  chapter, courseList, getChapterList, getLessonList, delLessonList, delChapterList
+  chapter,
+  CourseList,
+  chapterList,
+  LessonList,
+  delChapterLists, delLessonLists
 }

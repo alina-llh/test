@@ -1,12 +1,12 @@
-import { reqGetCourse } from '@api/edu/course'
-import { COURSE_ALL} from './constans'
-function getCourseAllListSync (data) {
-  return { type: COURSE_ALL, data }
+import { COUSRSELIST } from './constants'
+import { reqGetCourseList } from '@api/edu/course'
+function getCourseListSync (data) {
+  return { type: COUSRSELIST, data }
 }
-export function getCourseAllList() {
+export function getCourseList () {
   return dispatch => {
-   return reqGetCourse().then(req => {
-      dispatch(getCourseAllListSync(req))
+    return reqGetCourseList().then(res => {
+      dispatch(getCourseListSync(res))
     })
   }
 }

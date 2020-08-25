@@ -2,23 +2,26 @@ import React, { Component } from 'react';
 
 import { Row, Col, Statistic, Progress } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import Card from '@comps/Card';
 import { AreaChart, ColumnChart } from 'bizcharts';
-import './index.less';
-
+import Card from '@comps/Card';
 const firstRowCol = {
   xs: { span: 24 },
   md: { span: 12 },
   lg: { span: 6 },
 };
+// 数据源
 const data = [
-  { country: 'Europe', year: '1243', value: 350 },
-  { country: 'Europe', year: '1435', value: 370 },
-  { country: 'Europe', year: '1435', value: 400 },
-  { country: 'Asia', year: '1750', value: 362 },
-  { country: 'Asia', year: '1800', value: 435 },
+  { year: '1991', value: 3 },
+  { year: '1992', value: 4 },
+  { year: '1993', value: 3.5 },
+  { year: '1994', value: 5 },
+  { year: '1995', value: 4.9 },
+  { year: '1996', value: 6 },
+  { year: '1997', value: 7 },
+  { year: '1998', value: 9 },
+  { year: '1999', value: 13 },
 ];
-const rowdata = [
+const columnData = [
   {
     type: '家具家电',
     sales: 38,
@@ -53,68 +56,54 @@ const rowdata = [
   },
 ];
 export default class Analysis extends Component {
-  state = {
-    loading: true,
-  };
   render() {
     return (
       <Row gutter={[16, 16]}>
-        <Col span={6} {...firstRowCol}>
+        <Col span={6}>
           <Card
-            title={
-              <Statistic
-                title="总销售额"
-                prefix="￥"
-                value={112893}
-              ></Statistic>
-            }
-            footer={<span>日销售额 ￥12,423</span>}
+            title={<Statistic title="总销售额" prefix="￥" value={112893} />}
+            footer={<span>日销售额 ￥112893</span>}
           >
-            <span>
-              周同比12%
-              <CaretUpOutlined style={{ color: 'red' }} />
+            <span style={{ marginRight: 10 }}>
+              周同比 12% <CaretUpOutlined style={{ color: 'red' }} />
             </span>
-            <span style={{ marginLeft: 20 }}>
-              日同比10%
+            <span>
+              周同比 10%
               <CaretDownOutlined style={{ color: 'green' }} />
             </span>
           </Card>
         </Col>
-        <Col span={6} {...firstRowCol}>
+        <Col span={6}>
           <Card
-            title={<Statistic title="访问量" value={204354}></Statistic>}
-            footer={<span>日销售额 ￥12,423</span>}
+            title={<Statistic title="访问量" prefix="￥" value={112893} />}
+            footer={<span>日销售额 ￥112893</span>}
           >
-            {/* 面积图 */}
             <AreaChart
               data={data}
-              // title={{
-              //   visible: true,
-              //   text: '百分比堆叠面积图',
-              // }}
-              color="hotpink"
               forceFit={true}
-              smooth={true}
               padding="0"
+              color="pink"
               xAxis={{
-                visible: false,
+                // 水平坐标
+                visible: false, //不显示
               }}
               yAxis={{
-                visible: false,
+                // 水平坐标
+                visible: false, //不显示
               }}
+              smooth={true}
               xField="year"
               yField="value"
             />
           </Card>
         </Col>
-        <Col span={6} {...firstRowCol}>
+        <Col span={6}>
           <Card
-            title={<Statistic title="支付比数" value={34354}></Statistic>}
-            footer={<span>转化率60%</span>}
+            title={<Statistic title="支付笔数" value={31893} />}
+            footer={'转化率70%'}
           >
             <ColumnChart
-              data={rowdata}
-              forceFit
+              data={columnData}
               padding="0"
               xField="type"
               yField="sales"
@@ -135,20 +124,19 @@ export default class Analysis extends Component {
             />
           </Card>
         </Col>
-        <Col span={6} {...firstRowCol}>
+        <Col span={6}>
           <Card
-            title={<Statistic title="运营结果" value={43354}></Statistic>}
-            footer={<span>转化率80.2%</span>}
+            title={<Statistic title="运营结果" value={23251} />}
+            footer={'转化率88.8%'}
           >
             <Progress
-              percent={80.2}
-              size="small"
-              status="active"
               strokeColor={{
-                '0%': '#108ee9',
-                '100%': '#87d068',
+                from: '#108ee9',
+                to: '#87d068',
               }}
-            ></Progress>
+              percent={88.8}
+              status="active"
+            />
           </Card>
         </Col>
       </Row>

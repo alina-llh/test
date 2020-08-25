@@ -1,4 +1,4 @@
-import { SET_INTL } from '../constants/intl'
-export function setIntl (data) {
-  return { type: SET_INTL, data }
+import { INLI } from '../constants/intl'
+export function  intlLanguage (data) {
+  return { type: INLI, data }
 }

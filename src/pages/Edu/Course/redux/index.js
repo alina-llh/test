@@ -1,3 +1,5 @@
-import { getCourseAllList } from './actions'
+import { getCourseList } from './actions'
 import courseList from './reducer'
-export { getCourseAllList, courseList }
+export {
+  getCourseList, courseList
+}
